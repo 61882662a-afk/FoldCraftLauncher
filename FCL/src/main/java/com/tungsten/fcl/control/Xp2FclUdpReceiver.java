@@ -98,6 +98,7 @@ public final class Xp2FclUdpReceiver {
                 try {
                     DatagramPacket p = new DatagramPacket(buf, buf.length);
                     s.receive(p);
+                    Log.i("XP2FCL", "UDP received: " + new String(p.getData(), p.getOffset(), p.getLength(), StandardCharsets.US_ASCII));
                     if (p.getLength() == 0 || p.getLength() >= buf.length) continue;
                     String msg = new String(p.getData(), p.getOffset(), p.getLength(),
                             StandardCharsets.US_ASCII).trim();
