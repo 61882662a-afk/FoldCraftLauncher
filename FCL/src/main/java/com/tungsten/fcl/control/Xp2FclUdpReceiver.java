@@ -84,7 +84,7 @@ public final class Xp2FclUdpReceiver {
             s.setReuseAddress(true);
             s.bind(new InetSocketAddress(PORT));
             s.setSoTimeout(250);
-
+            Log.i("XP2FCL", "UDP receiver bound to port " + PORT);
             synchronized (this) {
                 if (generation != g || thread != Thread.currentThread()) {
                     s.close();
