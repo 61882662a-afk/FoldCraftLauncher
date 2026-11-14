@@ -194,8 +194,14 @@ public final class Xp2FclUdpReceiver {
         main.post(() -> {
             if (generation != g) return;
             if (down) {
-                if (deliveredDown.add(code)) input.sendKeyEvent(code, ch, true);
-            } else if (deliveredDown.remove(code)) input.sendKeyEvent(code, false);
+                if (deliveredDown.add(code)) {
+    Log.i("XP2FCL", "Deliver key DOWN: code=" + code);
+    input.sendKeyEvent(code, ch, true);
+                }
+            } else if (deliveredDown.remove(code)) {
+    Log.i("XP2FCL", "Deliver key UP: code=" + code);
+    input.sendKeyEvent(code, false);
+            }
         });
     }
 
