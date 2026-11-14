@@ -151,7 +151,8 @@ public final class Xp2FclUdpReceiver {
             Integer code = keys.get(norm(p[3]));
             int ch = hexChar(p[5]);
             if (!current(p[1]) || seq <= lastSeq || code == null || ch < 0
-                    || !(p[4].equals("D") || p[4].equals("U"))) return;
+            || !(p[4].equals("D") || p[4].equals("U"))) return;
+            Log.i("XP2FCL", "Accepted key: " + p[3] + " " + p[4] + " seq=" + seq);
             lastSeq = seq; lastPacket = now();
             change(code, p[4].equals("D"), p[4].equals("D") ? ch : 0, g);
             return;
