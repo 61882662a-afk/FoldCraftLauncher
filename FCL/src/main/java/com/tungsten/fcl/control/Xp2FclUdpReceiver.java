@@ -136,7 +136,10 @@ public final class Xp2FclUdpReceiver {
         if (p.length == 2 && p[0].equals("H")) {
             String id = p[1];
             if (!validSession(id)) return;
-            if (id.equals(session)) { lastPacket = now(); return; }
+            if (id.equals(session)) {
+                lastPacket = now();
+                return;
+            }
             if (session != null && fresh()) return;
             releaseWire(g);
             session = id; lastSeq = -1; lastPacket = now();
@@ -205,17 +208,30 @@ public final class Xp2FclUdpReceiver {
         }
     }
 
-    private boolean current(String id) { return session != null && session.equals(id) && validSession(id); }
-    private boolean fresh() { return now() - lastPacket <= TIMEOUT_MS; }
-    private static long now() { return SystemClock.elapsedRealtime(); }
+    private boolean current(String id) {
+        return session != null && session.equals(id) && validSession(id);
+    }
+    private boolean fresh() {
+        return now() - lastPacket <= TIMEOUT_MS;
+    }
+    private static long now() {
+        return SystemClock.elapsedRealtime();
+    }
     private static long sequence(String s) {
-        try { long n = Long.parseLong(s); return n >= 0 ? n : -1; }
-        catch (NumberFormatException e) { return -1; }
+        try {
+            long n = Long.parseLong(s);
+            return n >= 0 ? n : -1;
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
     private static int hexChar(String s) {
         if (s.length() != 4) return -1;
-        try { return Integer.parseInt(s, 16); }
-        catch (NumberFormatException e) { return -1; }
+        try {
+            return Integer.parseInt(s, 16);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
     private static boolean validSession(String s) {
         return s != null && s.matches("[0-9A-Fa-f]{8,64}");
