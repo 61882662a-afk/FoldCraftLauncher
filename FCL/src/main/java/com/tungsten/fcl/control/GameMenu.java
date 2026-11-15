@@ -115,6 +115,7 @@ public class GameMenu implements MenuCallback, FCLBridgeCallback {
     @Nullable
     private FCLBridge fclBridge;
     private FCLInput fclInput;
+    private Xp2FclUdpReceiver xp2fclUdpReceiver;  
     private MenuSetting menuSetting;
     private float cursorX;
     private float cursorY;
@@ -785,6 +786,9 @@ public class GameMenu implements MenuCallback, FCLBridgeCallback {
         this.simulated = fclBridge == null;
         this.gamepadControl = activity.getSharedPreferences("launcher", MODE_PRIVATE).getBoolean("gamepad_control", true);
         this.fclInput = new FCLInput(this);
+        if (!simulated) {
+                this.xp2fclUdpReceiver = new Xp2FclUdpReceiver(fclInput);
+        }
         if (!Controllers.isInitialized()) {
             Controllers.init();
         }
@@ -986,6 +990,9 @@ public class GameMenu implements MenuCallback, FCLBridgeCallback {
 
     @Override
     public void onResume() {
+        if (xp2fclUdpReceiver != null) {
+            xp2fclUdpReceiver.start();
+        }
         fclInput.startCaptureWatchdog();
         if (menuSetting != null && menuSetting.isEnableGyroscope() && gyroscope != null) {
             gyroscope.enableSensor();
