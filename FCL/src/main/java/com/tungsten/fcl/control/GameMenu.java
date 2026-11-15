@@ -978,6 +978,9 @@ public class GameMenu implements MenuCallback, FCLBridgeCallback {
 
     @Override
     public void onPause() {
+        if (xp2fclUdpReceiver != null) {
+            xp2fclUdpReceiver.stopAndRelease();
+        }
         if (cursorModeProperty.get() == FCLBridge.CursorDisabled) {
             fclInput.sendKeyEvent(FCLKeycodes.KEY_ESC, true);
             fclInput.sendKeyEvent(FCLKeycodes.KEY_ESC, false);
