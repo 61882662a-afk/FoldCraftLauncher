@@ -59,6 +59,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -214,9 +216,40 @@ public class DefaultLauncher {
 //        }
         if (MioLibPatcherManager.isEnabled()) {
             res.add("-javaagent:" + FCLPath.LIB_PATCHER_PATH);
-            MioLibPatcherManager.getJvmOptions().forEach(res::add);
-        }
 
+            if (MioLibPatcherManager.isSablerapier()) {
+                File sableRapierSource = new File(
+                        repository.getRunDirectory(version.getId()),
+                        ".sable/natives/sable_rapier_aarch64_linux.so"
+                );
+
+                File sableRapierPrivate = new File(
+                        FCLPath.CACHE_DIR,
+                        "sable_rapier_aarch64_linux.so"
+                );
+
+                if (!sableRapierSource.isFile()) {
+                    throw new IOException("Sable Rapier native library not found: "
+                            + sableRapierSource.getAbsolutePath());
+                }
+
+                File parent = sableRapierPrivate.getParentFile();
+                if (!parent.exists() && !parent.mkdirs()) {
+                    throw new IOException("Cannot create Sable Rapier private directory");
+                }
+
+                Files.copy(
+                        sableRapierSource.toPath(),
+                        sableRapierPrivate.toPath(),
+                        StandardCopyOption.REPLACE_EXISTING
+                );
+
+                res.add("-Dsable_rapier_path=" + sableRapierPrivate.getAbsolutePath());
+            }
+
+    MioLibPatcherManager.getJvmOptions().forEach(res::add);
+        }
+        
         Set<String> classpath = repository.getClasspath(version);
         addLWJGLClassPath(classpath);
         classpath.add(FCLPath.MIO_LAUNCH_WRAPPER);
