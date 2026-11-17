@@ -198,7 +198,16 @@ public class DefaultLauncher {
         res.addDefault("-Dsodium.checks.issue2561=", "false");
         res.addDefault("-Djdk.lang.Process.launchMechanism=", "FORK");
         res.addDefault("-Dcpu.name=", FCLauncher.getSocName());
-        NativeLibPlugin.getJVMEnv().forEach((k, v) -> res.addDefault(k + "=", v));
+        Map<String, String> nativeLibJvmEnv = NativeLibPlugin.getJVMEnv();
+        String sableRapierPluginPath = nativeLibJvmEnv.get("sable_rapier_path");
+        if (MioLibPatcherManager.isEnabled()
+                && MioLibPatcherManager.isSablerapier()
+                && sableRapierPluginPath != null) {
+            // Prefer the Android-native library supplied by NativeLibPlugin.
+            // Remove any older/manual path so addDefault cannot be suppressed by it.
+            res.removeIf(arg -> arg.startsWith("-Dsable_rapier_path="));
+        }
+        nativeLibJvmEnv.forEach((k, v) -> res.addDefault(k + "=", v));
         File libJna = new File(FCLPath.RUNTIME_DIR, "jna");
         if (jnaVersion != null && !jnaVersion.isEmpty()) {
             libJna = new File(libJna, jnaVersion);
@@ -217,7 +226,8 @@ public class DefaultLauncher {
         if (MioLibPatcherManager.isEnabled()) {
             res.add("-javaagent:" + FCLPath.LIB_PATCHER_PATH);
 
-            if (MioLibPatcherManager.isSablerapier()) {
+            if (MioLibPatcherManager.isSablerapier()
+                    && sableRapierPluginPath == null) {
                 File sableRapierSource = new File(
                         repository.getRunDirectory(version.getId()),
                         ".sable/natives/sable_rapier_aarch64_linux.so"
@@ -244,10 +254,10 @@ public class DefaultLauncher {
                         StandardCopyOption.REPLACE_EXISTING
                 );
 
-                res.add("-Dsable_rapier_path=" + sableRapierPrivate.getAbsolutePath());
+                res.addDefault("-Dsable_rapier_path=", sableRapierPrivate.getAbsolutePath());
             }
 
-    MioLibPatcherManager.getJvmOptions().forEach(res::add);
+            MioLibPatcherManager.getJvmOptions().forEach(res::add);
         }
         
         Set<String> classpath = repository.getClasspath(version);
